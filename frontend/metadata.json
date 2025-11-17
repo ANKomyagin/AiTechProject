@@ -1,0 +1,5 @@
+{
+  "name": "Speech Performance Analyzer",
+  "description": "An advanced UI to analyze public speaking performances by processing audio/video files. It provides transcription, emotion analysis, and an AI-generated comprehensive report on speech quality, emotional tone, and structure.",
+  "requestFramePermissions": []
+}
