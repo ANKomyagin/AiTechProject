@@ -4,7 +4,7 @@ import gc
 from whisperx.diarize import DiarizationPipeline
 
 
-def transcribe_and_diarize(audio_path, hf_token="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"):
+def transcribe_and_diarize(audio_path, hf_token="hf_token"):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"--- [Transcription] Starting on {device} ---")
 
