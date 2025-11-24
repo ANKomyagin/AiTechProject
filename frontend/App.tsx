@@ -4,7 +4,7 @@ import { Sidebar } from './components/Sidebar';
 import { FileUpload } from './components/FileUpload';
 import { MediaPlayer } from './components/MediaPlayer';
 import { AnalysisResults } from './components/AnalysisResults';
-import { analyzeSpeech } from './services/geminiService';
+import { analyzeSpeech } from './services/apiService';
 import type { AnalysisReport, EmotionDataPoint, HistoryItem } from './types';
 
 // Mock Data for demonstration purposes
@@ -37,7 +37,6 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Load history from localStorage on startup
     const savedHistory = localStorage.getItem('speechAnalysisHistory');
     if (savedHistory) {
       setHistory(JSON.parse(savedHistory));
@@ -62,28 +61,28 @@ export default function App() {
     setIsLoading(true);
     setError(null);
     try {
-      // In a real app, you'd process the audio/video fragment here.
-      // For this demo, we'll use mock data to generate a report.
-      const duration = endTime - startTime;
-      const mockEmotionData = generateMockEmotionData(duration);
-      const report = await analyzeSpeech(MOCK_TRANSCRIPT, mockEmotionData);
+      const result = await analyzeSpeech(file, startTime, endTime);
 
       const newAnalysis: HistoryItem = {
         id: new Date().toISOString(),
         title: file.name,
-        speaker: 'Unknown Speaker',
+        speaker: 'Detected Speaker',
         date: new Date().toLocaleDateString(),
         audioUrl: fileUrl!,
-        transcript: MOCK_TRANSCRIPT,
-        emotionData: mockEmotionData,
-        report: report,
+        transcript: result.transcript,
+        emotionData: result.emotionData,
+        report: result.report,
       };
 
       setActiveAnalysis(newAnalysis);
 
+      const updatedHistory = [newAnalysis, ...history];
+      setHistory(updatedHistory);
+      localStorage.setItem('speechAnalysisHistory', JSON.stringify(updatedHistory));
+
     } catch (e) {
       console.error(e);
-      setError('Failed to generate analysis. Please try again.');
+      setError('Failed to generate analysis. Is the Python backend running?');
     } finally {
       setIsLoading(false);
     }
@@ -109,9 +108,31 @@ export default function App() {
     }
   }
 
+    const handleDeleteHistoryItem = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    const confirmDelete = window.confirm("Are you sure you want to delete this analysis?");
+    if (!confirmDelete) return;
+
+    const newHistory = history.filter(item => item.id !== id);
+    setHistory(newHistory);
+    localStorage.setItem('speechAnalysisHistory', JSON.stringify(newHistory));
+
+    // Если удалили тот, который сейчас открыт - сбрасываем вью
+    if (activeAnalysis && activeAnalysis.id === id) {
+      handleNewAnalysis();
+    }
+  };
+
   return (
     <div className="flex h-screen bg-slate-900 text-slate-200 font-sans">
-      <Sidebar history={history} onNewAnalysis={handleNewAnalysis} onSelectHistoryItem={handleSelectHistoryItem} activeId={activeAnalysis?.id}/>
+      <Sidebar
+        history={history}
+        onNewAnalysis={handleNewAnalysis}
+        onSelectHistoryItem={handleSelectHistoryItem}
+        activeId={activeAnalysis?.id}
+        onDelete={handleDeleteHistoryItem} // Передаем проп
+      />
       <main className="flex-1 flex flex-col p-4 md:p-8 overflow-y-auto">
         {activeAnalysis ? (
           <AnalysisResults analysis={activeAnalysis} onSave={handleSave} />

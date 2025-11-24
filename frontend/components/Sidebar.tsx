@@ -1,17 +1,18 @@
-
 import React, { useState } from 'react';
 import type { HistoryItem } from '../types';
 import { PlusIcon } from './icons/PlusIcon';
 import { HistoryIcon } from './icons/HistoryIcon';
+import { TrashIcon } from './icons/TrashIcon'; // Импортируем
 
 interface SidebarProps {
   history: HistoryItem[];
   onNewAnalysis: () => void;
   onSelectHistoryItem: (id: string) => void;
+  onDelete: (id: string, e: React.MouseEvent) => void; // Добавили тип
   activeId?: string;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ history, onNewAnalysis, onSelectHistoryItem, activeId }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ history, onNewAnalysis, onSelectHistoryItem, onDelete, activeId }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -59,10 +60,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ history, onNewAnalysis, onSele
         {filteredHistory.length > 0 ? (
           <ul className="space-y-2">
             {filteredHistory.map(item => (
-              <li key={item.id}>
+              <li key={item.id} className="group relative">
                 <button
                   onClick={() => onSelectHistoryItem(item.id)}
-                  className={`w-full text-left p-3 rounded-md transition-colors ${activeId === item.id ? 'bg-sky-900/50' : 'hover:bg-slate-700/70'}`}
+                  className={`w-full text-left p-3 rounded-md transition-colors pr-10 ${activeId === item.id ? 'bg-sky-900/50' : 'hover:bg-slate-700/70'}`}
                 >
                   <div className={`flex items-center ${isCollapsed ? 'justify-center' : ''}`}>
                     <HistoryIcon />
@@ -74,6 +75,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ history, onNewAnalysis, onSele
                     )}
                   </div>
                 </button>
+                
+                {/* Кнопка удаления (появляется при наведении) */}
+                {!isCollapsed && (
+                    <button 
+                        onClick={(e) => onDelete(item.id, e)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Delete analysis"
+                    >
+                        <TrashIcon />
+                    </button>
+                )}
               </li>
             ))}
           </ul>

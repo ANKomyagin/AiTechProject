@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { RangeSlider } from './RangeSlider';
 
@@ -8,6 +7,61 @@ interface MediaPlayerProps {
   onAnalyze: (startTime: number, endTime: number) => void;
   isLoading: boolean;
 }
+
+// Вспомогательный компонент для ввода времени
+const TimeInput: React.FC<{ 
+    time: number; 
+    max: number; 
+    onChange: (val: number) => void 
+}> = ({ time, max, onChange }) => {
+    const [value, setValue] = useState("00:00");
+
+    useEffect(() => {
+        const minutes = Math.floor(time / 60);
+        const seconds = Math.floor(time % 60);
+        setValue(`${minutes}:${seconds.toString().padStart(2, '0')}`);
+    }, [time]);
+
+    const handleBlur = () => {
+        const parts = value.split(':');
+        let newTime = 0;
+        if (parts.length === 2) {
+            const m = parseInt(parts[0]) || 0;
+            const s = parseInt(parts[1]) || 0;
+            newTime = m * 60 + s;
+        } else {
+             newTime = parseInt(value) || 0;
+        }
+        
+        // Validation
+        if (newTime < 0) newTime = 0;
+        if (newTime > max) newTime = max;
+        
+        onChange(newTime);
+        
+        // Reset display to formatted
+        const minutes = Math.floor(newTime / 60);
+        const seconds = Math.floor(newTime % 60);
+        setValue(`${minutes}:${seconds.toString().padStart(2, '0')}`);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            (e.target as HTMLInputElement).blur();
+        }
+    };
+
+    return (
+        <input 
+            type="text" 
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+            className="w-16 bg-slate-700 border border-slate-600 rounded px-1 py-0.5 text-center text-sm focus:border-sky-500 focus:outline-none"
+        />
+    );
+};
 
 export const MediaPlayer: React.FC<MediaPlayerProps> = ({ fileUrl, fileType, onAnalyze, isLoading }) => {
   const mediaRef = useRef<HTMLVideoElement | HTMLAudioElement>(null);
@@ -20,8 +74,10 @@ export const MediaPlayer: React.FC<MediaPlayerProps> = ({ fileUrl, fileType, onA
     const media = mediaRef.current;
     if (media) {
       const setMediaDuration = () => {
+          if(!Number.isFinite(media.duration)) return;
           setDuration(media.duration);
-          setRange([0, media.duration]);
+          // Only set range to full duration if it hasn't been set yet or was 0
+          setRange(prev => (prev[1] === 0 ? [0, media.duration] : prev));
       };
       const setMediaTime = () => setCurrentTime(media.currentTime);
       
@@ -30,7 +86,6 @@ export const MediaPlayer: React.FC<MediaPlayerProps> = ({ fileUrl, fileType, onA
       media.addEventListener('play', () => setIsPlaying(true));
       media.addEventListener('pause', () => setIsPlaying(false));
       
-      // If metadata is already loaded
       if(media.readyState > 0) {
         setMediaDuration();
       }
@@ -44,20 +99,13 @@ export const MediaPlayer: React.FC<MediaPlayerProps> = ({ fileUrl, fileType, onA
     }
   }, [fileUrl]);
   
-  const handlePlayPause = () => {
-    if (mediaRef.current) {
-      if (isPlaying) {
-        mediaRef.current.pause();
-      } else {
-        mediaRef.current.play();
-      }
-    }
+  // Handlers for manual input changes
+  const handleStartChange = (val: number) => {
+      setRange([Math.min(val, range[1] - 1), range[1]]);
   };
-  
-  const formatTime = (time: number) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+  const handleEndChange = (val: number) => {
+      setRange([range[0], Math.max(val, range[0] + 1)]);
   };
 
   return (
@@ -77,9 +125,15 @@ export const MediaPlayer: React.FC<MediaPlayerProps> = ({ fileUrl, fileType, onA
             onChange={setRange}
             currentTime={currentTime}
         />
-        <div className="flex justify-between text-sm text-slate-400 mt-2">
-            <span>{formatTime(range[0])}</span>
-            <span>{formatTime(range[1])}</span>
+        <div className="flex justify-between items-center text-sm text-slate-400 mt-3">
+            <div className="flex items-center gap-2">
+                <span>Start:</span>
+                <TimeInput time={range[0]} max={duration} onChange={handleStartChange} />
+            </div>
+            <div className="flex items-center gap-2">
+                <span>End:</span>
+                <TimeInput time={range[1]} max={duration} onChange={handleEndChange} />
+            </div>
         </div>
       </div>
 
