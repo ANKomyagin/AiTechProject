@@ -40,7 +40,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ history, onNewAnalysis, onSele
           className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-sky-600 rounded-md hover:bg-sky-500 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-sky-500"
         >
           <PlusIcon />
-          {!isCollapsed && <span>New Analysis</span>}
+          {!isCollapsed && <span>Новый анализ</span>}
         </button>
       </div>
       
@@ -48,7 +48,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ history, onNewAnalysis, onSele
         <div className="p-4 border-b border-slate-700">
           <input
             type="text"
-            placeholder="Search history..."
+            placeholder="Поиск по истории..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full px-3 py-2 bg-slate-700 rounded-md placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
@@ -81,7 +81,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ history, onNewAnalysis, onSele
                     <button 
                         onClick={(e) => onDelete(item.id, e)}
                         className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                        title="Delete analysis"
+                        title="Удалить"
                     >
                         <TrashIcon />
                     </button>
@@ -90,7 +90,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ history, onNewAnalysis, onSele
             ))}
           </ul>
         ) : (
-          !isCollapsed && <p className="text-center text-slate-500 p-4">No history found.</p>
+          !isCollapsed && <p className="text-center text-slate-500 p-4">История не найдена.</p>
         )}
       </div>
     </div>

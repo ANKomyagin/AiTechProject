@@ -110,7 +110,7 @@ export const MediaPlayer: React.FC<MediaPlayerProps> = ({ fileUrl, fileType, onA
 
   return (
     <div className="w-full max-w-4xl mx-auto flex flex-col items-center gap-6 p-4 bg-slate-800/50 rounded-lg">
-      <h2 className="text-xl font-semibold text-slate-300">Select a fragment to analyze</h2>
+      <h2 className="text-xl font-semibold text-slate-300">Выберите фрагмент для анализа</h2>
       {fileType.startsWith('video/') ? (
         <video ref={mediaRef as React.RefObject<HTMLVideoElement>} src={fileUrl} controls className="w-full rounded-lg" />
       ) : (
@@ -127,11 +127,11 @@ export const MediaPlayer: React.FC<MediaPlayerProps> = ({ fileUrl, fileType, onA
         />
         <div className="flex justify-between items-center text-sm text-slate-400 mt-3">
             <div className="flex items-center gap-2">
-                <span>Start:</span>
+                <span>Начало:</span>
                 <TimeInput time={range[0]} max={duration} onChange={handleStartChange} />
             </div>
             <div className="flex items-center gap-2">
-                <span>End:</span>
+                <span>Конец:</span>
                 <TimeInput time={range[1]} max={duration} onChange={handleEndChange} />
             </div>
         </div>
@@ -151,7 +151,7 @@ export const MediaPlayer: React.FC<MediaPlayerProps> = ({ fileUrl, fileType, onA
                 Analyzing...
             </>
         ) : (
-          'Analyze Selected Fragment'
+          'Анализировать выделенный фрагмент'
         )}
       </button>
     </div>
