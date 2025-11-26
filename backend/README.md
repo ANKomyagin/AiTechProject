@@ -1,4 +1,4 @@
-**Бэкенд проекта Speech Performance Analyzer**
+# Бэкенд проекта Speech Performance Analyzer
 
 *REST API на FastAPI для анализа речи с использованием современных ML-моделей*
 
