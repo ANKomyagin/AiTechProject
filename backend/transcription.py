@@ -80,3 +80,4 @@ def transcribe_and_diarize(audio_path, hf_token="hf_token"):
         gc.collect()
         torch.cuda.empty_cache()
         raise e
+
